@@ -93,13 +93,13 @@
 
         <section class="exam-panel">
           <div>
-            <p class="panel-label">ミニ模試</p>
-            <h2>5問を続けて解く</h2>
+            <p class="panel-label">EXAM SIMULATION</p>
+            <h2>本番風の模試で解く</h2>
             <p class="panel-text">
-              その場で採点し、最後にスコアを表示します。
+              1問ずつ進む形式で、制限時間つきの模試として解けます。
             </p>
           </div>
-          <button id="start-exam" class="button button-dark">模試を開始</button>
+          <button id="start-exam" class="button button-dark">本番モードを開始</button>
         </section>
 
         <section id="exam-section" class="exam-section hidden" aria-live="polite">
@@ -151,7 +151,10 @@
             <p class="category-card-title"></p>
             <p class="category-card-subtitle"></p>
           </div>
-          <button class="mini-button category-card-button">この内容を解く</button>
+          <div class="category-card-actions">
+            <button class="mini-button category-card-button">この内容を解く</button>
+            <button class="mini-button category-mini-test-button">10問テスト</button>
+          </div>
         </div>
         <div class="category-progress">
           <div class="category-progress-bar">

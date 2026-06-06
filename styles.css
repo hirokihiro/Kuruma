@@ -294,6 +294,12 @@ select:focus {
   margin-bottom: 12px;
 }
 
+.category-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .category-card-title,
 .category-card-subtitle,
 .category-progress-text {
@@ -499,6 +505,128 @@ select:focus {
   padding: 16px;
   background: linear-gradient(180deg, rgba(232, 247, 255, 0.9), rgba(255, 245, 200, 0.7));
   margin-top: 16px;
+}
+
+.exam-hud {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.exam-hud-step,
+.exam-hud-timer,
+.exam-summary-text,
+.exam-breakdown-line,
+.exam-note {
+  margin: 0;
+}
+
+.exam-hud-step,
+.exam-hud-timer {
+  font-weight: 800;
+}
+
+.exam-progress-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(103, 126, 145, 0.12);
+  overflow: hidden;
+}
+
+.exam-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8ad4f7 0%, #ffd95a 100%);
+}
+
+.exam-question-main {
+  content-visibility: visible;
+  contain-intrinsic-size: auto;
+}
+
+.exam-note {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 14px;
+}
+
+.exam-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.exam-tools,
+.exam-result-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.exam-summary-text {
+  color: #4d6477;
+  font-weight: 700;
+  margin: 10px 0 14px;
+}
+
+.exam-breakdown {
+  display: grid;
+  gap: 10px;
+}
+
+.exam-breakdown-line {
+  padding-top: 10px;
+  border-top: 1px dashed rgba(67, 89, 109, 0.16);
+  color: #4a5d6e;
+  line-height: 1.7;
+}
+
+.exam-review-header {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.exam-review-list {
+  display: grid;
+  gap: 10px;
+}
+
+.exam-review-item {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 14px;
+  text-align: left;
+  display: grid;
+  gap: 4px;
+  color: var(--ink);
+}
+
+.exam-review-index {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--accent-deep);
+}
+
+.exam-review-title {
+  font-weight: 800;
+}
+
+.exam-review-state {
+  font-size: 0.88rem;
+  color: var(--muted);
 }
 
 .hidden {
