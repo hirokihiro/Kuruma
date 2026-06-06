@@ -4,12 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>仮免トレーニング</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -75,6 +69,28 @@
           </div>
         </section>
 
+        <section class="support-panel">
+          <div class="support-header">
+            <div>
+              <p class="panel-label">STUDY SUPPORT</p>
+              <h2>内容別と苦手別で解く</h2>
+              <p class="panel-text">
+                カテゴリごとの理解度を見ながら、苦手分野だけを絞って復習できます。
+              </p>
+            </div>
+            <div class="support-actions">
+              <button id="focus-weakness" class="button button-dark">
+                苦手だけ表示
+              </button>
+              <button id="clear-filters" class="button button-secondary">
+                絞り込み解除
+              </button>
+            </div>
+          </div>
+          <div id="weak-summary" class="weak-summary"></div>
+          <div id="category-overview" class="category-overview"></div>
+        </section>
+
         <section class="exam-panel">
           <div>
             <p class="panel-label">ミニ模試</p>
@@ -125,6 +141,24 @@
           <p class="feedback"></p>
         </div>
         <div class="explanation hidden"></div>
+      </article>
+    </template>
+
+    <template id="category-card-template">
+      <article class="category-card">
+        <div class="category-card-head">
+          <div>
+            <p class="category-card-title"></p>
+            <p class="category-card-subtitle"></p>
+          </div>
+          <button class="mini-button category-card-button">この内容を解く</button>
+        </div>
+        <div class="category-progress">
+          <div class="category-progress-bar">
+            <span class="category-progress-fill"></span>
+          </div>
+          <p class="category-progress-text"></p>
+        </div>
       </article>
     </template>
 

@@ -119,13 +119,17 @@ const questions = [
     explanation:
       "踏切内での立ち往生は重大事故につながります。出口側の余地を確認してから進入します。",
   },
-];
+].map((question) => ({
+  ...question,
+  searchText: `${question.title} ${question.text} ${question.category}`.toLowerCase(),
+}));
 
 const storageKey = "karimen-training-progress";
 const state = {
   category: "all",
   mode: "all",
   search: "",
+  searchTimer: null,
   randomIds: null,
   progress: loadProgress(),
   examQuestions: [],
@@ -138,6 +142,7 @@ const elements = {
   questionList: document.querySelector("#question-list"),
   questionCount: document.querySelector("#question-count"),
   template: document.querySelector("#question-template"),
+  categoryCardTemplate: document.querySelector("#category-card-template"),
   answeredCount: document.querySelector("#answered-count"),
   correctRate: document.querySelector("#correct-rate"),
   streakCount: document.querySelector("#streak-count"),
@@ -148,6 +153,10 @@ const elements = {
   examBody: document.querySelector("#exam-body"),
   examTitle: document.querySelector("#exam-title"),
   closeExam: document.querySelector("#close-exam"),
+  focusWeakness: document.querySelector("#focus-weakness"),
+  clearFilters: document.querySelector("#clear-filters"),
+  weakSummary: document.querySelector("#weak-summary"),
+  categoryOverview: document.querySelector("#category-overview"),
 };
 
 initialize();
@@ -182,9 +191,13 @@ function bindEvents() {
   });
 
   elements.searchInput.addEventListener("input", (event) => {
-    state.search = event.target.value.trim();
-    state.randomIds = null;
-    renderQuestions();
+    const nextValue = event.target.value.trim().toLowerCase();
+    window.clearTimeout(state.searchTimer);
+    state.searchTimer = window.setTimeout(() => {
+      state.search = nextValue;
+      state.randomIds = null;
+      renderQuestions();
+    }, 120);
   });
 
   elements.startRandom.addEventListener("click", () => {
@@ -209,15 +222,25 @@ function bindEvents() {
   elements.closeExam.addEventListener("click", () => {
     closeExamMode();
   });
+
+  elements.focusWeakness.addEventListener("click", () => {
+    applyWeaknessFilter();
+  });
+
+  elements.clearFilters.addEventListener("click", () => {
+    resetFilters();
+  });
 }
 
 function render() {
   renderQuestions();
   renderStats();
+  renderStudySupport();
 }
 
 function renderQuestions() {
   const filtered = getFilteredQuestions();
+  const fragment = document.createDocumentFragment();
   elements.questionList.innerHTML = "";
   elements.questionCount.textContent = `${filtered.length}問`;
 
@@ -230,8 +253,9 @@ function renderQuestions() {
   }
 
   for (const question of filtered) {
-    elements.questionList.append(renderQuestionCard(question));
+    fragment.append(renderQuestionCard(question));
   }
+  elements.questionList.append(fragment);
 }
 
 function renderQuestionCard(question) {
@@ -292,7 +316,7 @@ function renderQuestionCard(question) {
     feedback.textContent = isCorrect ? "正解です。" : "不正解です。";
     feedback.className = `feedback ${isCorrect ? "correct" : "incorrect"}`;
     explanation.classList.remove("hidden");
-    renderStats();
+    render();
   });
 
   return fragment;
@@ -307,6 +331,87 @@ function renderStats() {
   elements.answeredCount.textContent = String(answeredCount);
   elements.correctRate.textContent = `${rate}%`;
   elements.streakCount.textContent = String(getCurrentStreak());
+}
+
+function renderStudySupport() {
+  const categoryStats = getCategoryStats();
+  const weakCategories = categoryStats.filter((category) => category.answered > 0 && category.rate < 70);
+
+  renderWeakSummary(weakCategories);
+  renderCategoryOverview(categoryStats);
+}
+
+function renderWeakSummary(weakCategories) {
+  elements.weakSummary.innerHTML = "";
+
+  if (weakCategories.length === 0) {
+    const message = document.createElement("p");
+    message.className = "support-note";
+    message.textContent =
+      "まだ苦手分野は出ていません。数問解くと、正答率の低いカテゴリがここに出ます。";
+    elements.weakSummary.append(message);
+    return;
+  }
+
+  const title = document.createElement("p");
+  title.className = "support-note";
+  title.textContent = "復習優先:";
+  elements.weakSummary.append(title);
+
+  const chipRow = document.createElement("div");
+  chipRow.className = "weak-chip-row";
+
+  for (const category of weakCategories) {
+    const button = document.createElement("button");
+    button.className = "weak-chip";
+    button.type = "button";
+    button.textContent = `${category.name} ${category.rate}%`;
+    button.addEventListener("click", () => {
+      state.category = category.name;
+      state.mode = "incorrect";
+      state.randomIds = null;
+      syncFilters();
+      renderQuestions();
+      scrollToQuestions();
+    });
+    chipRow.append(button);
+  }
+
+  elements.weakSummary.append(chipRow);
+}
+
+function renderCategoryOverview(categoryStats) {
+  const fragment = document.createDocumentFragment();
+  elements.categoryOverview.innerHTML = "";
+
+  for (const category of categoryStats) {
+    const card = elements.categoryCardTemplate.content.cloneNode(true);
+    const title = card.querySelector(".category-card-title");
+    const subtitle = card.querySelector(".category-card-subtitle");
+    const fill = card.querySelector(".category-progress-fill");
+    const progressText = card.querySelector(".category-progress-text");
+    const button = card.querySelector(".category-card-button");
+
+    title.textContent = category.name;
+    subtitle.textContent =
+      category.answered === 0
+        ? `全${category.total}問 / まだ未着手`
+        : `${category.correct} / ${category.answered}問正解`;
+    fill.style.width = `${category.rate}%`;
+    progressText.textContent = `正答率 ${category.rate}%`;
+
+    button.addEventListener("click", () => {
+      state.category = category.name;
+      state.randomIds = null;
+      syncFilters();
+      renderQuestions();
+      scrollToQuestions();
+    });
+
+    fragment.append(card);
+  }
+
+  elements.categoryOverview.append(fragment);
 }
 
 function getCurrentStreak() {
@@ -324,6 +429,24 @@ function getCurrentStreak() {
   return streak;
 }
 
+function getCategoryStats() {
+  const categories = [...new Set(questions.map((question) => question.category))];
+  return categories.map((name) => {
+    const categoryQuestions = questions.filter((question) => question.category === name);
+    const answered = categoryQuestions.filter((question) => state.progress[question.id]);
+    const correct = answered.filter((question) => state.progress[question.id].correct).length;
+    const rate = answered.length === 0 ? 0 : Math.round((correct / answered.length) * 100);
+
+    return {
+      name,
+      total: categoryQuestions.length,
+      answered: answered.length,
+      correct,
+      rate,
+    };
+  });
+}
+
 function getFilteredQuestions(options = {}) {
   return getFilteredQuestionsBase(options);
 }
@@ -333,8 +456,7 @@ function getFilteredQuestionsBase(options = {}) {
   return questions.filter((question) => {
     const matchesCategory = state.category === "all" || question.category === state.category;
     const matchesSearch =
-      state.search === "" ||
-      `${question.title} ${question.text} ${question.category}`.includes(state.search);
+      state.search === "" || question.searchText.includes(state.search);
     const progress = state.progress[question.id];
     const matchesMode =
       state.mode === "all" ||
@@ -449,6 +571,42 @@ function closeExamMode() {
   elements.examSection.classList.add("hidden");
   elements.examBody.innerHTML = "";
   state.examQuestions = [];
+}
+
+function applyWeaknessFilter() {
+  const weakCategories = getCategoryStats().filter((category) => category.answered > 0 && category.rate < 70);
+
+  if (weakCategories.length === 0) {
+    state.mode = "incorrect";
+    state.category = "all";
+  } else {
+    state.category = weakCategories[0].name;
+    state.mode = "incorrect";
+  }
+
+  state.randomIds = null;
+  syncFilters();
+  renderQuestions();
+  scrollToQuestions();
+}
+
+function resetFilters() {
+  state.category = "all";
+  state.mode = "all";
+  state.search = "";
+  state.randomIds = null;
+  elements.searchInput.value = "";
+  syncFilters();
+  renderQuestions();
+}
+
+function syncFilters() {
+  elements.categoryFilter.value = state.category;
+  elements.modeFilter.value = state.mode;
+}
+
+function scrollToQuestions() {
+  window.scrollTo({ top: document.querySelector(".question-header").offsetTop - 20, behavior: "smooth" });
 }
 
 function shuffle(items) {
