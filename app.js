@@ -1266,6 +1266,33 @@ const questions = [
 
 const storageKey = "karimen-training-progress";
 const examStorageKey = "karimen-training-exam-session";
+const popularCollections = [
+  {
+    id: "karimen-core",
+    title: "仮免頻出ベーシック",
+    description: "一時停止、徐行、横断歩道、信号、踏切、合図などの基礎セット。",
+    questionIds: [1, 3, 4, 6, 7, 11, 12, 19, 23, 24, 37, 49, 62, 64, 71, 72, 77, 82, 91, 101, 112, 120],
+  },
+  {
+    id: "pedestrian-signal",
+    title: "歩行者・信号の落とし穴",
+    description: "横断歩道、歩行者保護、点滅信号、黄信号、赤点滅を重点復習。",
+    questionIds: [4, 7, 19, 21, 28, 37, 39, 49, 51, 64, 75, 77, 89, 91, 101, 113, 116, 118],
+  },
+  {
+    id: "intersection-priority",
+    title: "交差点・優先関係集中",
+    description: "右左折、優先道路、左方優先、緊急自動車、広い道路優先の整理用。",
+    questionIds: [5, 17, 25, 26, 27, 43, 45, 54, 58, 63, 68, 76, 83, 95, 107, 114, 119],
+  },
+  {
+    id: "danger-zones",
+    title: "踏切・駐停車・危険場所",
+    description: "踏切、駐停車禁止場所、消火栓、坂道駐車などの危険場所セット。",
+    questionIds: [6, 8, 12, 20, 24, 32, 42, 46, 53, 60, 67, 69, 78, 82, 85, 92, 98, 100],
+  },
+];
+
 const state = {
   category: "all",
   mode: "all",
@@ -1285,6 +1312,7 @@ const elements = {
   questionCount: document.querySelector("#question-count"),
   template: document.querySelector("#question-template"),
   categoryCardTemplate: document.querySelector("#category-card-template"),
+  collectionCardTemplate: document.querySelector("#collection-card-template"),
   answeredCount: document.querySelector("#answered-count"),
   correctRate: document.querySelector("#correct-rate"),
   streakCount: document.querySelector("#streak-count"),
@@ -1299,6 +1327,7 @@ const elements = {
   clearFilters: document.querySelector("#clear-filters"),
   weakSummary: document.querySelector("#weak-summary"),
   categoryOverview: document.querySelector("#category-overview"),
+  popularCollections: document.querySelector("#popular-collections"),
   resumePanel: document.querySelector("#resume-panel"),
   resumeText: document.querySelector("#resume-text"),
   resumeExam: document.querySelector("#resume-exam"),
@@ -1415,6 +1444,7 @@ function render() {
   renderQuestions();
   renderStats();
   renderStudySupport();
+  renderPopularCollections();
 }
 
 function renderQuestions() {
@@ -1518,6 +1548,49 @@ function renderStudySupport() {
 
   renderWeakSummary(weakCategories);
   renderCategoryOverview(categoryStats);
+}
+
+function renderPopularCollections() {
+  const fragment = document.createDocumentFragment();
+  elements.popularCollections.innerHTML = "";
+
+  for (const collection of popularCollections) {
+    const card = elements.collectionCardTemplate.content.cloneNode(true);
+    const title = card.querySelector(".collection-title");
+    const text = card.querySelector(".collection-text");
+    const meta = card.querySelector(".collection-meta");
+    const practiceButton = card.querySelector(".collection-practice-button");
+    const testButton = card.querySelector(".collection-test-button");
+    const questionSet = questions.filter((question) => collection.questionIds.includes(question.id));
+
+    title.textContent = collection.title;
+    text.textContent = collection.description;
+    meta.textContent = `${questionSet.length}問収録`;
+
+    practiceButton.addEventListener("click", () => {
+      state.randomIds = new Set(questionSet.map((question) => question.id));
+      state.category = "all";
+      state.mode = "all";
+      state.search = "";
+      elements.searchInput.value = "";
+      syncFilters();
+      renderQuestions();
+      scrollToQuestions();
+    });
+
+    testButton.addEventListener("click", () => {
+      const pool = shuffle([...questionSet]).slice(0, Math.min(10, questionSet.length));
+      startCustomExam({
+        title: `${collection.title} 模試`,
+        pool,
+        durationSeconds: pool.length * 40,
+      });
+    });
+
+    fragment.append(card);
+  }
+
+  elements.popularCollections.append(fragment);
 }
 
 function renderWeakSummary(weakCategories) {

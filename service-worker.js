@@ -1,4 +1,4 @@
-const CACHE_NAME = "karimen-training-v1";
+const CACHE_NAME = "karimen-training-v2";
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -24,6 +24,33 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
+    return;
+  }
+
+  const url = new URL(event.request.url);
+  const isAppAsset =
+    url.origin === self.location.origin &&
+    (url.pathname.endsWith("/") ||
+      url.pathname.endsWith("/index.html") ||
+      url.pathname.endsWith("/styles.css") ||
+      url.pathname.endsWith("/app.js") ||
+      url.pathname.endsWith("/manifest.webmanifest") ||
+      url.pathname.endsWith("/icon.svg"));
+
+  if (isAppAsset) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (!response || response.status !== 200) {
+            return caches.match(event.request).then((cached) => cached || caches.match("./index.html"));
+          }
+
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html"))),
+    );
     return;
   }
 
