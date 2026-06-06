@@ -48,15 +48,15 @@ select {
 .page-shell {
   width: min(100% - 20px, 1120px);
   margin: 0 auto;
-  padding: 16px 0 48px;
+  padding: 16px 0 56px;
 }
 
 .hero {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 16px;
   align-items: stretch;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .hero-copy,
@@ -79,7 +79,7 @@ select {
 .exam-section,
 .question-card {
   border-radius: 22px;
-  padding: 18px;
+  padding: 20px;
 }
 
 .hero-copy {
@@ -102,10 +102,10 @@ select {
 .eyebrow,
 .panel-label,
 .card-label {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-size: 0.72rem;
   font-weight: 900;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   color: #5d6f80;
 }
 
@@ -123,9 +123,9 @@ h1 {
 }
 
 h2 {
-  font-size: 1.45rem;
-  line-height: 1.2;
-  margin-bottom: 8px;
+  font-size: 1.55rem;
+  line-height: 1.18;
+  margin-bottom: 10px;
 }
 
 h3 {
@@ -146,8 +146,9 @@ h3 {
 
 .hero-text {
   line-height: 1.75;
-  margin-bottom: 18px;
-  font-size: 0.97rem;
+  margin-bottom: 20px;
+  font-size: 0.99rem;
+  max-width: 34rem;
 }
 
 .hero-actions {
@@ -158,6 +159,16 @@ h3 {
 
 .hero-card {
   padding-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--highlight) 100%);
 }
 
 .stats-grid {
@@ -189,7 +200,8 @@ h3 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+  padding-block: 16px;
 }
 
 .toolbar-block {
@@ -241,6 +253,7 @@ select:focus {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 249, 252, 0.9)),
     var(--paper);
+  position: relative;
 }
 
 .app-panel-copy {
@@ -287,6 +300,7 @@ select:focus {
   border-radius: 22px;
   padding: 18px;
   margin-bottom: 18px;
+  position: relative;
 }
 
 .collection-panel {
@@ -299,6 +313,19 @@ select:focus {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 249, 252, 0.9)),
     var(--paper);
+  position: relative;
+}
+
+.support-panel::before,
+.collection-panel::before,
+.app-panel::before,
+.exam-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(120, 201, 242, 0.65), rgba(255, 217, 90, 0.45), transparent 70%);
 }
 
 .support-actions {
@@ -334,6 +361,16 @@ select:focus {
   font-weight: 700;
   cursor: pointer;
   box-shadow: inset 0 0 0 1px rgba(47, 135, 184, 0.14);
+  min-height: 44px;
+  transition:
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.weak-chip:hover,
+.mini-button:hover {
+  background: #def2ff;
+  transform: translateY(-1px);
 }
 
 .category-overview {
@@ -439,18 +476,20 @@ select:focus {
 }
 
 .question-header {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  padding-inline: 2px;
 }
 
 .question-count {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent-deep);
 }
 
 .question-list {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .question-card,
@@ -465,7 +504,7 @@ select:focus {
   justify-content: space-between;
   gap: 10px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .category-badge,
@@ -489,29 +528,41 @@ select:focus {
 }
 
 .question-title {
-  font-size: 1.08rem;
-  margin-bottom: 8px;
+  font-size: 1.26rem;
+  line-height: 1.35;
+  margin-bottom: 10px;
 }
 
 .question-text {
-  line-height: 1.8;
-  margin-bottom: 16px;
-  font-size: 0.97rem;
+  line-height: 1.88;
+  margin-bottom: 18px;
+  font-size: 1rem;
+  color: #556679;
 }
 
 .choices {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .choice {
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.92);
-  padding: 14px;
+  padding: 16px 14px;
   display: flex;
   gap: 12px;
   align-items: flex-start;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.choice:hover {
+  border-color: rgba(47, 135, 184, 0.28);
+  background: rgba(232, 247, 255, 0.72);
+  transform: translateY(-1px);
 }
 
 .choice input {
@@ -522,7 +573,7 @@ select:focus {
 }
 
 .question-footer {
-  margin-top: 16px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -549,11 +600,13 @@ select:focus {
   border-top: 1px dashed var(--line);
   line-height: 1.8;
   font-size: 0.95rem;
+  color: #506172;
+  background: linear-gradient(180deg, rgba(232, 247, 255, 0.36), transparent);
 }
 
 .button {
   width: 100%;
-  min-height: 50px;
+  min-height: 52px;
   border: 0;
   border-radius: 999px;
   padding: 13px 18px;
@@ -710,6 +763,16 @@ select:focus {
   display: grid;
   gap: 4px;
   color: var(--ink);
+  transition:
+    border-color 140ms ease,
+    transform 140ms ease,
+    background 140ms ease;
+}
+
+.exam-review-item:hover {
+  border-color: rgba(47, 135, 184, 0.28);
+  transform: translateY(-1px);
+  background: rgba(232, 247, 255, 0.72);
 }
 
 .exam-review-index {
@@ -737,6 +800,7 @@ select:focus {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.82);
   color: var(--muted);
+  border: 1px dashed rgba(67, 89, 109, 0.2);
 }
 
 @media (min-width: 700px) {
@@ -821,6 +885,13 @@ select:focus {
     grid-template-columns: 0.8fr 0.8fr 1.4fr;
     gap: 16px;
     margin-bottom: 24px;
+  }
+
+  .app-panel,
+  .support-panel,
+  .collection-panel {
+    border-radius: 28px;
+    padding: 24px;
   }
 
   .category-overview {
