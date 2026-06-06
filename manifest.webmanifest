@@ -1,0 +1,17 @@
+{
+  "name": "仮免トレーニング",
+  "short_name": "仮免トレ",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#eef4f8",
+  "theme_color": "#78c9f2",
+  "description": "仮免学科の学習、模試、苦手復習ができるトレーニングアプリ。",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

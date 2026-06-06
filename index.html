@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#78c9f2" />
     <title>仮免トレーニング</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -66,6 +68,28 @@
               type="search"
               placeholder="例: 徐行 / 信号 / 踏切"
             />
+          </div>
+        </section>
+
+        <section class="app-panel">
+          <div class="app-panel-copy">
+            <p class="panel-label">APP TOOLS</p>
+            <h2>続きから再開とデータ管理</h2>
+            <p class="panel-text">
+              模試の途中状態を保持し、学習データの書き出しや読み込みもできます。ホーム画面追加にも対応します。
+            </p>
+          </div>
+          <div id="resume-panel" class="resume-panel hidden">
+            <p id="resume-text" class="support-note"></p>
+            <div class="resume-actions">
+              <button id="resume-exam" class="button button-primary">模試を再開</button>
+              <button id="discard-exam" class="button button-secondary">破棄する</button>
+            </div>
+          </div>
+          <div class="data-actions">
+            <button id="export-progress" class="mini-button">学習データを書き出し</button>
+            <label class="mini-button file-button" for="import-progress">学習データを読み込む</label>
+            <input id="import-progress" type="file" accept="application/json" class="hidden-file-input" />
           </div>
         </section>
 

@@ -785,6 +785,7 @@ const questions = [
 }));
 
 const storageKey = "karimen-training-progress";
+const examStorageKey = "karimen-training-exam-session";
 const state = {
   category: "all",
   mode: "all",
@@ -818,14 +819,23 @@ const elements = {
   clearFilters: document.querySelector("#clear-filters"),
   weakSummary: document.querySelector("#weak-summary"),
   categoryOverview: document.querySelector("#category-overview"),
+  resumePanel: document.querySelector("#resume-panel"),
+  resumeText: document.querySelector("#resume-text"),
+  resumeExam: document.querySelector("#resume-exam"),
+  discardExam: document.querySelector("#discard-exam"),
+  exportProgress: document.querySelector("#export-progress"),
+  importProgress: document.querySelector("#import-progress"),
 };
 
 initialize();
 
 function initialize() {
+  hydrateExamSession();
   populateCategories();
   bindEvents();
   render();
+  renderResumePanel();
+  registerServiceWorker();
 }
 
 function populateCategories() {
@@ -890,6 +900,34 @@ function bindEvents() {
 
   elements.clearFilters.addEventListener("click", () => {
     resetFilters();
+  });
+
+  elements.resumeExam.addEventListener("click", () => {
+    if (!state.examSession) {
+      return;
+    }
+    elements.examTitle.textContent = state.examSession.title;
+    elements.examSection.classList.remove("hidden");
+    renderExamScreen();
+    startExamTimer();
+    elements.examSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  elements.discardExam.addEventListener("click", () => {
+    discardSavedExam();
+  });
+
+  elements.exportProgress.addEventListener("click", () => {
+    exportProgressData();
+  });
+
+  elements.importProgress.addEventListener("change", async (event) => {
+    const [file] = event.target.files || [];
+    if (!file) {
+      return;
+    }
+    await importProgressData(file);
+    event.target.value = "";
   });
 }
 
@@ -1164,6 +1202,8 @@ function startCustomExam({ title, pool, durationSeconds }) {
   };
 
   elements.examTitle.textContent = title;
+  persistExamSession();
+  renderResumePanel();
   elements.examSection.classList.remove("hidden");
   renderExamScreen();
   startExamTimer();
@@ -1251,6 +1291,8 @@ function finishExam() {
   elements.examBody.innerHTML = "";
   elements.examBody.append(result);
   state.examSession = null;
+  localStorage.removeItem(examStorageKey);
+  renderResumePanel();
 }
 
 function createResultHeading(score, total) {
@@ -1265,7 +1307,8 @@ function closeExamMode() {
   }
   elements.examSection.classList.add("hidden");
   elements.examBody.innerHTML = "";
-  state.examSession = null;
+  persistExamSession();
+  renderResumePanel();
 }
 
 function applyWeaknessFilter() {
@@ -1372,6 +1415,7 @@ function renderExamScreen() {
     input.checked = selectedAnswer === choiceIndex;
     input.addEventListener("change", () => {
       session.answers[currentQuestion.id] = choiceIndex;
+      persistExamSession();
       updateExamNav();
     });
 
@@ -1394,6 +1438,7 @@ function renderExamScreen() {
   flagButton.textContent = session.flagged[currentQuestion.id] ? "見直しフラグ解除" : "見直しフラグ";
   flagButton.addEventListener("click", () => {
     session.flagged[currentQuestion.id] = !session.flagged[currentQuestion.id];
+    persistExamSession();
     renderExamScreen();
   });
 
@@ -1403,6 +1448,7 @@ function renderExamScreen() {
   reviewButton.textContent = "見直し一覧";
   reviewButton.addEventListener("click", () => {
     session.view = "review";
+    persistExamSession();
     renderExamReview();
   });
 
@@ -1415,6 +1461,7 @@ function renderExamScreen() {
   backButton.disabled = session.currentIndex === 0;
   backButton.addEventListener("click", () => {
     session.currentIndex -= 1;
+    persistExamSession();
     renderExamScreen();
   });
 
@@ -1429,6 +1476,7 @@ function renderExamScreen() {
       return;
     }
     session.currentIndex += 1;
+    persistExamSession();
     renderExamScreen();
   });
 
@@ -1442,6 +1490,7 @@ function updateExamNav() {
   if (!session) {
     return;
   }
+  persistExamSession();
   renderExamScreen();
 }
 
@@ -1515,6 +1564,7 @@ function renderExamReview() {
     item.addEventListener("click", () => {
       session.currentIndex = index;
       session.view = "question";
+      persistExamSession();
       renderExamScreen();
     });
     list.append(item);
@@ -1529,6 +1579,7 @@ function renderExamReview() {
   backToQuestionButton.textContent = "問題に戻る";
   backToQuestionButton.addEventListener("click", () => {
     session.view = "question";
+    persistExamSession();
     renderExamScreen();
   });
 
@@ -1570,4 +1621,119 @@ function loadProgress() {
 
 function saveProgress() {
   localStorage.setItem(storageKey, JSON.stringify(state.progress));
+}
+
+function persistExamSession() {
+  if (!state.examSession) {
+    localStorage.removeItem(examStorageKey);
+    return;
+  }
+
+  const session = state.examSession;
+  const payload = {
+    title: session.title,
+    currentIndex: session.currentIndex,
+    answers: session.answers,
+    flagged: session.flagged,
+    durationSeconds: session.durationSeconds,
+    deadline: session.deadline,
+    view: session.view,
+    pool: session.pool.map((question) => question.id),
+  };
+  localStorage.setItem(examStorageKey, JSON.stringify(payload));
+}
+
+function hydrateExamSession() {
+  try {
+    const raw = localStorage.getItem(examStorageKey);
+    if (!raw) {
+      return;
+    }
+    const saved = JSON.parse(raw);
+    const pool = saved.pool
+      .map((id) => questions.find((question) => question.id === id))
+      .filter(Boolean);
+
+    if (pool.length === 0 || Date.now() >= saved.deadline) {
+      localStorage.removeItem(examStorageKey);
+      return;
+    }
+
+    state.examSession = {
+      title: saved.title,
+      pool,
+      currentIndex: saved.currentIndex ?? 0,
+      answers: saved.answers ?? {},
+      flagged: saved.flagged ?? {},
+      durationSeconds: saved.durationSeconds,
+      deadline: saved.deadline,
+      timerId: null,
+      view: saved.view ?? "question",
+    };
+  } catch {
+    localStorage.removeItem(examStorageKey);
+  }
+}
+
+function renderResumePanel() {
+  if (!state.examSession) {
+    elements.resumePanel.classList.add("hidden");
+    return;
+  }
+
+  elements.resumePanel.classList.remove("hidden");
+  elements.resumeText.textContent =
+    `${state.examSession.title} の途中データがあります。` +
+    ` ${getAnsweredCount(state.examSession)} / ${state.examSession.pool.length}問 回答済み。`;
+}
+
+function discardSavedExam() {
+  if (state.examSession?.timerId) {
+    window.clearInterval(state.examSession.timerId);
+  }
+  state.examSession = null;
+  localStorage.removeItem(examStorageKey);
+  elements.examSection.classList.add("hidden");
+  elements.examBody.innerHTML = "";
+  renderResumePanel();
+}
+
+function exportProgressData() {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    progress: state.progress,
+    lastExamWrongIds: state.lastExamWrongIds,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "karimen-progress.json";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importProgressData(file) {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.progress || typeof data.progress !== "object") {
+      throw new Error("invalid");
+    }
+    state.progress = data.progress;
+    state.lastExamWrongIds = Array.isArray(data.lastExamWrongIds) ? data.lastExamWrongIds : [];
+    saveProgress();
+    render();
+  } catch {
+    window.alert("学習データの読み込みに失敗しました。");
+  }
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
 }

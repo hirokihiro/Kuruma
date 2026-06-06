@@ -223,11 +223,61 @@ select:focus {
 .exam-panel,
 .question-header,
 .exam-header,
-.support-header {
+.support-header,
+.app-panel {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 14px;
+}
+
+.app-panel {
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: var(--shadow);
+  border-radius: 22px;
+  padding: 18px;
+  margin-bottom: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 249, 252, 0.9)),
+    var(--paper);
+}
+
+.app-panel-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.resume-panel {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.resume-actions,
+.data-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .support-panel {
@@ -682,6 +732,11 @@ select:focus {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .resume-actions,
+  .data-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .support-actions {
