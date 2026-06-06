@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>仮免トレーニング</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">KARIMEN PRACTICE</p>
+          <h1>仮免の学科を、<br />毎日すぐ解ける形に。</h1>
+          <p class="hero-text">
+            仮免で出やすい論点をベースにしたオリジナル問題を収録。正誤だけで終わらず、理由まで確認できます。
+          </p>
+          <div class="hero-actions">
+            <button id="start-random" class="button button-primary">
+              ランダム5問を始める
+            </button>
+            <button id="reset-progress" class="button button-secondary">
+              履歴をリセット
+            </button>
+          </div>
+        </div>
+        <section class="hero-card">
+          <p class="card-label">進捗</p>
+          <div class="stats-grid">
+            <article>
+              <span id="answered-count" class="stat-value">0</span>
+              <span class="stat-label">解答済み</span>
+            </article>
+            <article>
+              <span id="correct-rate" class="stat-value">0%</span>
+              <span class="stat-label">正答率</span>
+            </article>
+            <article>
+              <span id="streak-count" class="stat-value">0</span>
+              <span class="stat-label">連続正解</span>
+            </article>
+          </div>
+        </section>
+      </header>
+
+      <main>
+        <section class="toolbar">
+          <div class="toolbar-block">
+            <label for="category-filter">カテゴリ</label>
+            <select id="category-filter">
+              <option value="all">すべて</option>
+            </select>
+          </div>
+          <div class="toolbar-block">
+            <label for="mode-filter">表示</label>
+            <select id="mode-filter">
+              <option value="all">全問題</option>
+              <option value="incorrect">間違えた問題</option>
+              <option value="unanswered">未回答の問題</option>
+            </select>
+          </div>
+          <div class="toolbar-block toolbar-block-wide">
+            <label for="search-input">キーワード</label>
+            <input
+              id="search-input"
+              type="search"
+              placeholder="例: 徐行 / 信号 / 踏切"
+            />
+          </div>
+        </section>
+
+        <section class="exam-panel">
+          <div>
+            <p class="panel-label">ミニ模試</p>
+            <h2>5問を続けて解く</h2>
+            <p class="panel-text">
+              その場で採点し、最後にスコアを表示します。
+            </p>
+          </div>
+          <button id="start-exam" class="button button-dark">模試を開始</button>
+        </section>
+
+        <section id="exam-section" class="exam-section hidden" aria-live="polite">
+          <div class="exam-header">
+            <div>
+              <p class="panel-label">EXAM MODE</p>
+              <h3 id="exam-title">模試</h3>
+            </div>
+            <button id="close-exam" class="button button-secondary">
+              終了
+            </button>
+          </div>
+          <div id="exam-body"></div>
+        </section>
+
+        <section class="question-header">
+          <div>
+            <p class="panel-label">QUESTION BANK</p>
+            <h2>問題一覧</h2>
+          </div>
+          <p id="question-count" class="question-count">0問</p>
+        </section>
+
+        <section id="question-list" class="question-list" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <template id="question-template">
+      <article class="question-card">
+        <div class="question-meta">
+          <span class="category-badge"></span>
+          <span class="question-status">未回答</span>
+        </div>
+        <h3 class="question-title"></h3>
+        <p class="question-text"></p>
+        <div class="choices"></div>
+        <div class="question-footer">
+          <button class="button button-primary answer-button">回答する</button>
+          <p class="feedback"></p>
+        </div>
+        <div class="explanation hidden"></div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
